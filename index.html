@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sweet Blend Shop — Mega Catálogo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', system-ui, sans-serif; background: #0a0a0a; color: #e4e4e7; }
+        .font-display { font-family: 'Playfair Display', serif; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ec4899; }
+        .glass { background: rgba(24,24,27,0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.06); }
+        .product-card { transition: all 0.4s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden; }
+        .product-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px -12px rgba(236,72,153,0.25); border-color: rgba(236,72,153,0.3); }
+        .product-card:hover .product-img { transform: scale(1.08); }
+        .product-img { transition: transform 0.5s ease; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes confettiFall { to { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+        @keyframes pulse-glow { 0%,100% { box-shadow: 0 0 20px rgba(236,72,153,0.3); } 50% { box-shadow: 0 0 40px rgba(236,72,153,0.5); } }
+        @keyframes bounce-soft { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        .animate-fade-up { animation: fadeInUp 0.6s ease forwards; }
+        .animate-scale-in { animation: scaleIn 0.4s ease forwards; }
+        .stagger-item { opacity: 0; animation: fadeInUp 0.5s ease forwards; }
+        .modal-overlay { background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); }
+        .modal-content { animation: scaleIn 0.3s ease; }
+        .toast { animation: fadeInUp 0.4s ease; }
+        .btn-glow { position: relative; overflow: hidden; }
+        .btn-glow::before { content: ''; position: absolute; inset: -2px; background: linear-gradient(45deg,#ec4899,#8b5cf6,#f59e0b,#ec4899); background-size: 400%; border-radius: inherit; z-index: -1; filter: blur(12px); opacity: 0; transition: opacity 0.3s; animation: glowMove 3s linear infinite; }
+        .btn-glow:hover::before { opacity: 0.6; }
+        @keyframes glowMove { 0% { background-position: 0%; } 100% { background-position: 400%; } }
+        .cat-active { background: linear-gradient(135deg,rgba(236,72,153,0.15),rgba(139,92,246,0.1)); border: 1px solid rgba(236,72,153,0.3); color: #ec4899; }
+        .confetti { position: fixed; width: 10px; height: 10px; pointer-events: none; z-index: 9999; animation: confettiFall 3s linear forwards; }
+        .price-tag { background: linear-gradient(135deg,rgba(236,72,153,0.1),rgba(236,72,153,0.05)); border: 1px solid rgba(236,72,153,0.2); }
+        .qty-btn { transition: all 0.2s; }
+        .qty-btn:hover { background: rgba(236,72,153,0.2); color: #ec4899; }
+        .qty-btn:active { transform: scale(0.9); }
+        .security-badge { background: linear-gradient(135deg,rgba(16,185,129,0.1),rgba(16,185,129,0.05)); border: 1px solid rgba(16,185,129,0.2); }
+        .gradient-text { background: linear-gradient(135deg,#ec4899,#f59e0b,#ec4899); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientMove 3s ease infinite; }
+        @keyframes gradientMove { 0%,100% { background-position: 0% center; } 50% { background-position: 100% center; } }
+        .input-focus:focus { box-shadow: 0 0 0 3px rgba(236,72,153,0.2), 0 0 20px rgba(236,72,153,0.1); }
+        .cart-item { animation: slideInRight 0.4s ease; }
+        .empty-cart { animation: bounce-soft 2s ease-in-out infinite; }
+        .nav-active { color: #ec4899 !important; background: rgba(236,72,153,0.1); }
+        .login-screen { transition: opacity 0.5s ease, visibility 0.5s ease; }
+        .login-screen.hidden-screen { opacity: 0; visibility: hidden; pointer-events: none; }
+        .main-app { opacity: 0; transition: opacity 0.5s ease; }
+        .main-app.visible { opacity: 1; }
+    </style>
+<base target="_blank">
+</head>
+<body class="min-h-screen bg-zinc-950">
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen" class="login-screen fixed inset-0 z-50 flex items-center justify-center bg-zinc-950">
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-20 left-10 w-72 h-72 bg-pink-500/10 rounded-full blur-[100px] animate-pulse"></div>
+        <div class="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px] animate-pulse" style="animation-delay:1s;"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[150px] animate-pulse" style="animation-delay:2s;"></div>
+    </div>
+    <div class="relative z-10 w-full max-w-md px-4">
+        <div class="glass rounded-3xl p-10 shadow-2xl animate-scale-in">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-pink-500 to-violet-600 rounded-2xl mb-6 shadow-lg" style="animation:pulse-glow 3s ease-in-out infinite;">
+                    <i class="fa-solid fa-blender text-4xl text-white"></i>
+                </div>
+                <h1 class="font-display text-5xl font-bold mb-2 gradient-text">Sweet Blend</h1>
+                <p class="text-zinc-400 text-lg">Doces • Sucos • Momentos Felizes</p>
+                <div class="mt-3 flex items-center justify-center gap-2 text-xs text-zinc-500">
+                    <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                    <span>Ambiente Seguro de Demonstração</span>
+                </div>
+            </div>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-2 ml-1">Nome do Usuário</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"></i>
+                        <input id="username-input" type="text" maxlength="30" autocomplete="off"
+                            class="w-full bg-zinc-900 border border-zinc-700 focus:border-pink-500 rounded-2xl pl-12 pr-5 py-4 text-lg outline-none transition-all input-focus text-white placeholder-zinc-600"
+                            placeholder="Digite seu nome completo" onkeydown="if(event.key==='Enter') handleLogin()">
+                    </div>
+                    <p id="login-error" class="text-red-400 text-sm mt-2 hidden">
+                        <i class="fa-solid fa-circle-exclamation mr-1"></i> Digite um nome válido (2-30 caracteres)
+                    </p>
+                </div>
+                <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-pink-500 to-violet-600 hover:from-pink-600 hover:to-violet-700 py-4 rounded-2xl font-semibold text-lg transition-all active:scale-[0.98] shadow-lg text-white">
+                    <i class="fa-solid fa-arrow-right-to-bracket mr-2"></i>Entrar na Loja
+                </button>
+                <div class="security-badge rounded-2xl p-4 flex items-center gap-3">
+                    <i class="fa-solid fa-lock text-emerald-400 text-lg"></i>
+                    <div class="text-xs text-zinc-400">
+                        <p class="text-emerald-400 font-semibold mb-0.5">Proteção XSS Ativa</p>
+                        <p>Inputs sanitizados • Crédito teste: <span class="text-amber-400 font-mono">R$ 100,00</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app" class="main-app hidden min-h-screen">
+    <header class="glass sticky top-0 z-40 border-b border-zinc-800/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="showSection('catalog')">
+                <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-blender text-xl text-white"></i>
+                </div>
+                <div>
+                    <span class="font-display font-bold text-2xl tracking-tight">Sweet Blend</span>
+                    <span class="hidden sm:inline text-zinc-500 text-sm ml-1">Shop</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-4">
+                <button onclick="showSection('catalog')" class="nav-item flex items-center gap-2 px-4 py-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition-all text-sm" data-section="catalog">
+                    <i class="fa-solid fa-store"></i><span class="hidden sm:inline font-medium">Catálogo</span>
+                </button>
+                <button onclick="showSection('cart')" class="nav-item flex items-center gap-2 px-4 py-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition-all relative text-sm" data-section="cart">
+                    <i class="fa-solid fa-cart-shopping"></i><span class="hidden sm:inline font-medium">Carrinho</span>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-gradient-to-r from-pink-500 to-violet-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full hidden">0</span>
+                </button>
+                <div class="flex items-center gap-3 pl-3 sm:pl-6 border-l border-zinc-800">
+                    <div class="text-right hidden sm:block">
+                        <p id="welcome-name" class="font-semibold text-sm text-white"></p>
+                        <p class="text-xs text-emerald-400 flex items-center justify-end gap-1">
+                            <i class="fa-solid fa-wallet text-[10px]"></i>R$ <span id="credit-balance" class="font-mono font-bold">100.00</span>
+                        </p>
+                    </div>
+                    <button onclick="logout()" class="w-9 h-9 bg-zinc-800 hover:bg-red-500/20 hover:text-red-400 transition-all rounded-xl flex items-center justify-center" title="Sair">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="hero-banner" class="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-2">
+        <div class="relative rounded-3xl overflow-hidden bg-gradient-to-r from-pink-500/10 via-violet-500/10 to-amber-500/10 border border-white/5 p-8 sm:p-10">
+            <div class="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div class="text-center sm:text-left">
+                    <h2 class="font-display text-3xl sm:text-4xl font-bold mb-2">Bem-vindo à <span class="gradient-text">Sweet Blend</span></h2>
+                    <p class="text-zinc-400 max-w-lg">O maior catálogo de sucos, doces e streetwear do Brasil. Mais de 250 produtos esperando por você!</p>
+                </div>
+                <div class="flex gap-3 sm:gap-4 flex-wrap justify-center">
+                    <div class="text-center"><div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-pink-500/20 flex items-center justify-center mb-1 sm:mb-2 text-xl sm:text-2xl">🥤</div><p class="text-[10px] sm:text-xs text-zinc-500">80 Sucos</p></div>
+                    <div class="text-center"><div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-violet-500/20 flex items-center justify-center mb-1 sm:mb-2 text-xl sm:text-2xl">🎂</div><p class="text-[10px] sm:text-xs text-zinc-500">40 Bolos</p></div>
+                    <div class="text-center"><div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-amber-500/20 flex items-center justify-center mb-1 sm:mb-2 text-xl sm:text-2xl">🍦</div><p class="text-[10px] sm:text-xs text-zinc-500">30 Sorvetes</p></div>
+                    <div class="text-center"><div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-orange-500/20 flex items-center justify-center mb-1 sm:mb-2 text-xl sm:text-2xl">🥟</div><p class="text-[10px] sm:text-xs text-zinc-500">60 Salgados</p></div>
+                    <div class="text-center"><div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center mb-1 sm:mb-2 text-xl sm:text-2xl">👕</div><p class="text-[10px] sm:text-xs text-zinc-500">40 Roupas</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex flex-col lg:flex-row gap-6">
+        <aside class="lg:w-60 flex-shrink-0">
+            <div class="glass rounded-3xl p-5 sticky top-24">
+                <h3 class="uppercase text-xs tracking-[0.2em] text-zinc-500 mb-4 font-semibold">Categorias</h3>
+                <nav class="space-y-1" id="category-nav"></nav>
+                <div class="mt-6 pt-4 border-t border-zinc-800">
+                    <div class="security-badge rounded-xl p-3 flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-emerald-400 text-sm"></i>
+                        <span class="text-[10px] text-zinc-400">Sistema protegido contra XSS</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 min-w-0">
+            <section id="catalog-section">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6">
+                    <div>
+                        <h2 id="section-title" class="font-display text-3xl font-bold mb-1">Todos os Produtos</h2>
+                        <p id="product-count" class="text-zinc-500 text-sm">Carregando...</p>
+                    </div>
+                    <div class="relative w-full sm:w-72">
+                        <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"></i>
+                        <input id="search-input" onkeyup="searchProducts()" type="text" placeholder="Buscar produtos..."
+                            class="w-full bg-zinc-900 border border-zinc-700 rounded-2xl pl-12 pr-5 py-3 outline-none focus:border-pink-500 transition-all input-focus text-sm text-white placeholder-zinc-600" autocomplete="off">
+                    </div>
+                </div>
+                <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5"></div>
+            </section>
+
+            <section id="cart-section" class="hidden">
+                <h2 class="font-display text-3xl font-bold mb-1">Seu Carrinho</h2>
+                <p class="text-zinc-500 mb-6 text-sm">Revise seus itens antes de finalizar a compra</p>
+                <div id="cart-items" class="space-y-4"></div>
+                <div id="cart-summary" class="mt-6 glass rounded-3xl p-6 sm:p-8 border border-white/5 hidden">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center"><span class="text-zinc-400">Subtotal</span><span id="subtotal" class="font-mono text-lg">R$ 0,00</span></div>
+                        <div class="flex justify-between items-center"><span class="text-zinc-400">Frete</span><span class="text-emerald-400 font-medium flex items-center gap-1 text-sm"><i class="fa-solid fa-truck-fast text-xs"></i> Grátis</span></div>
+                    </div>
+                    <div class="h-px bg-gradient-to-r from-transparent via-zinc-700 to-transparent my-4"></div>
+                    <div class="flex justify-between items-center mb-6">
+                        <div><span class="text-xl font-bold text-white">Total</span><span class="text-xs text-zinc-500 block">em até 3x sem juros</span></div>
+                        <span id="total" class="font-mono text-2xl sm:text-3xl font-bold text-pink-400">R$ 0,00</span>
+                    </div>
+                    <button onclick="checkout()" class="btn-glow w-full bg-gradient-to-r from-pink-500 via-violet-500 to-pink-500 py-5 rounded-2xl font-bold text-lg active:scale-[0.98] transition-all shadow-lg text-white flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-credit-card"></i>Finalizar Compra
+                    </button>
+                    <button onclick="showSection('catalog')" class="mt-3 w-full py-3 rounded-2xl font-medium text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all">Continuar Comprando</button>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<!-- MODALS -->
+<div id="product-modal" class="hidden fixed inset-0 modal-overlay flex items-center justify-center z-[100] p-4" onclick="if(event.target===this) closeProductModal()">
+    <div class="modal-content bg-zinc-900 rounded-3xl max-w-lg w-full border border-zinc-700 overflow-hidden shadow-2xl"><div id="modal-content"></div></div>
+</div>
+
+<div id="success-modal" class="hidden fixed inset-0 modal-overlay flex items-center justify-center z-[100] p-4" onclick="if(event.target===this) closeSuccessModal()">
+    <div class="modal-content glass rounded-3xl p-8 sm:p-10 max-w-md text-center border border-emerald-500/30 shadow-2xl">
+        <div class="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce-soft">
+            <i class="fa-solid fa-circle-check text-5xl text-emerald-400"></i>
+        </div>
+        <h3 class="font-display text-3xl font-bold mb-2 text-white">Pedido Finalizado! 🎉</h3>
+        <p class="text-zinc-400 mb-2">Obrigado por comprar na Sweet Blend Shop!</p>
+        <p class="text-emerald-400 text-sm mb-6 font-medium">Seu pedido foi processado com sucesso.</p>
+        <div class="bg-emerald-500/10 rounded-xl p-4 mb-8 border border-emerald-500/20 text-left">
+            <p class="text-xs text-zinc-500 mb-1">Número do pedido</p>
+            <p class="font-mono text-emerald-400 font-bold text-lg" id="order-number">#SB-000000</p>
+            <p class="text-xs text-zinc-500 mt-2">Crédito atualizado: <span class="text-emerald-400 font-mono" id="success-credit">R$ 0,00</span></p>
+        </div>
+        <button onclick="closeSuccessModal()" class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 rounded-2xl font-semibold text-white transition-all shadow-lg"><i class="fa-solid fa-store mr-2"></i>Voltar ao Catálogo</button>
+    </div>
+</div>
+
+<div id="error-modal" class="hidden fixed inset-0 modal-overlay flex items-center justify-center z-[100] p-4" onclick="if(event.target===this) closeErrorModal()">
+    <div class="modal-content glass rounded-3xl p-8 sm:p-10 max-w-md text-center border border-red-500/30 shadow-2xl">
+        <div class="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fa-solid fa-triangle-exclamation text-5xl text-red-400"></i>
+        </div>
+        <h3 class="font-display text-3xl font-bold mb-2 text-red-400">Transação Recusada</h3>
+        <p id="error-message" class="text-zinc-400 mb-6 leading-relaxed"></p>
+        <div class="bg-red-500/10 rounded-xl p-3 mb-6 border border-red-500/20"><p class="text-red-400 text-xs font-mono">CÓDIGO: INSUFFICIENT_BALANCE_001</p></div>
+        <button onclick="closeErrorModal()" class="w-full py-4 bg-zinc-700 hover:bg-zinc-600 rounded-2xl font-semibold text-white transition-all">Fechar</button>
+    </div>
+</div>
+
+<div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] flex flex-col gap-2 pointer-events-none"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// SWEET BLEND SHOP v3.0 — MEGA CATÁLOGO (250 produtos)
+// 80 Sucos + 40 Bolos + 30 Sorvetes + 60 Salgados + 40 Roupas
+// ═══════════════════════════════════════════════════════════════
+
+let currentUser = "", credit = 100.00, cart = [], currentCategory = 'all';
+
+// ==================== IMAGENS (URLs do Unsplash) ====================
+const productImages = {
+    // SUCOS 1-80
+    1:"https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=400&h=300&fit=crop",
+    2:"https://images.unsplash.com/photo-1546548970-71785318a17b?w=400&h=300&fit=crop",
+    3:"https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&h=300&fit=crop",
+    4:"https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?w=400&h=300&fit=crop",
+    5:"https://images.unsplash.com/photo-1613478223719-2ab802602423?w=400&h=300&fit=crop",
+    6:"https://images.unsplash.com/photo-1506802913710-40e2e66339c9?w=400&h=300&fit=crop",
+    7:"https://images.unsplash.com/photo-1497534547325-3e6b22637e38?w=400&h=300&fit=crop",
+    8:"https://images.unsplash.com/photo-1534353473418-4cfa6c56fd38?w=400&h=300&fit=crop",
+    9:"https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400&h=300&fit=crop",
+    10:"https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=300&fit=crop",
+    11:"https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=400&h=300&fit=crop",
+    12:"https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?w=400&h=300&fit=crop",
+    13:"https://images.unsplash.com/photo-1536657464919-892534f60d6e?w=400&h=300&fit=crop",
+    14:"https://images.unsplash.com/photo-1553530979-7ee52a2670c4?w=400&h=300&fit=crop",
+    15:"https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=400&h=300&fit=crop",
+    16:"https://images.unsplash.com/photo-1603569283847-aa295f0d016a?w=400&h=300&fit=crop",
+    17:"https://images.unsplash.com/photo-1596500531424-6f116b0d7a56?w=400&h=300&fit=crop",
+    18:"https://images.unsplash.com/photo-1577805947697-89e18249d767?w=400&h=300&fit=crop",
+    19:"https://images.unsplash.com/photo-1556881286-fc6915169721?w=400&h=300&fit=crop",
+    20:"https://images.unsplash.com/photo-1590004987778-bece5c9adab6?w=400&h=300&fit=crop",
+    21:"https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&h=300&fit=crop",
+    22:"https://images.unsplash.com/photo-1613478223719-2ab802602423?w=400&h=300&fit=crop",
+    23:"https://images.unsplash.com/photo-1553530979-7ee52a2670c4?w=400&h=300&fit=crop",
+    24:"https://images.unsplash.com/photo-1497534547325-3e6b22637e38?w=400&h=300&fit=crop",
+    25:"https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400&h=300&fit=crop",
+    26:"https://images.unsplash.com/photo-1497534547325-3e6b22637e38?w=400&h=300&fit=crop",
+    27:"https://images.unsplash.com/photo-1577049352846-4a222e784d38?w=400&h=300&fit=crop",
+    28:"https://images.unsplash.com/photo-1590004987778-bece5c9adab6?w=400&h=300&fit=crop",
+    29:"https://images.unsplash.com/photo-1603569283847-aa295f0d016a?w=400&h=300&fit=crop",
+    30:"https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?w=400&h=300&fit=crop",
+    31:"https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&h=300&fit=crop",
+    32:"https://images.unsplash.com/photo-1546548970-71785318a17b?w=400&h=300&fit=crop",
+    33:"https://images.unsplash.com/photo-1506802913710-40e2e66339c9?w=400&h=300&fit=crop",
+    34:"https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=400&h=300&fit=crop",
+    35:"https://images.unsplash.com/photo-1536657464919-892534f60d6e?w=400&h=300&fit=crop",
+    36:"https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?w=400&h=300&fit=crop",
+    37:"https://images.unsplash.com/photo-1556881286-fc6915169721?w=400&h=300&fit=crop",
+    38:"https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&h=300&fit=crop",
+    39:"https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=400&h=300&fit=crop",
+    40:"https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=300&fit=crop",
+    41:"https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400&h=300&fit=crop",
+    42:"https://images.unsplash.com/photo-1534353473418-4cfa6c56fd38?w=400&h=300&fit=crop",
+    43:"https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&h=300&fit=crop",
+    44:"https://images.unsplash.com/photo-1497534547325-3e6b22637e38?w=400&h=300&fit=crop",
+    45:"https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?w=400&h=300&fit=crop",
+    46:"https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=400&h=300&fit=crop",
+    47:"https://images.unsplash.com/photo-1553530979-7ee52a2670c4?w=400&h=300&fit=crop",
+    48:"https://images.unsplash.com/photo-1603569283847-aa295f0d016a?w=400&h=300&fit=crop",
+    49:"https://images.unsplash.com/photo-1596500531424-6f116b0d7a56?w=400&h=300&fit=crop",
+    50:"https://images.unsplash.com/photo-1577805947697-89e18249d767?w=400&h=300&fit=crop",
+    51:"https://images.unsplash.com/photo-1590004987778-bece5c9adab6?w=400&h=300&fit=crop",
+    52:"https://images.unsplash.com/photo-1613478223719-2ab802602423?w=400&h=300&fit=crop",
+    53:"https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=400&h=300&fit=crop",
+    54:"https://images.unsplash.com/photo-1536657464919-892534f60d6e?w=400&h=300&fit=crop",
+    55:"https://images.unsplash.com/photo-1506802913710-40e2e66339c9?w=400&h=300&fit=crop",
+    56:"https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=300&fit=crop",
+    57:"https://images.unsplash.com/photo-1546548970-71785318a17b?w=400&h=300&fit=crop",
+    58:"https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&h=300&fit=crop",
+    59:"https://images.unsplash.com/photo-1556881286-fc6915169721?w=400&h=300&fit=crop",
+    60:"https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&h=300&fit=crop",
+    61:"https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=400&h=300&fit=crop",
+    62:"https://images.unsplash.com/photo-1497534547325-3e6b22637e38?w=400&h=300&fit=crop",
+    63:"https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?w=400&h=300&fit=crop",
+    64:"https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400&h=300&fit=crop",
+    65:"https://images.unsplash.com/photo-1534353473418-4cfa6c56fd38?w=400&h=300&fit=crop",
+    66:"https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?w=400&h=300&fit=crop",
+    67:"https://images.unsplash.com/photo-1603569283847-aa295f0d016a?w=400&h=300&fit=crop",
+    68:"https://images.unsplash.com/photo-1553530979-7ee52a2670c4?w=400&h=300&fit=crop",
+    69:"https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=400&h=300&fit=crop",
+    70:"https://images.unsplash.com/photo-1577805947697-89e18249d767?w=400&h=300&fit=crop",
+    71:"https://images.unsplash.com/photo-1596500531424-6f116b0d7a56?w=400&h=300&fit=crop",
+    72:"https://images.unsplash.com/photo-1590004987778-bece5c9adab6?w=400&h=300&fit=crop",
+    73:"https://images.unsplash.com/photo-1613478223719-2ab802602423?w=400&h=300&fit=crop",
+    74:"https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=400&h=300&fit=crop",
+    75:"https://images.unsplash.com/photo-1506802913710-40e2e66339c9?w=400&h=300&fit=crop",
+    76:"https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=300&fit=crop",
+    77:"https://images.unsplash.com/photo-1546548970-71785318a17b?w=400&h=300&fit=crop",
+    78:"https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&h=300&fit=crop",
+    79:"https://images.unsplash.com/photo-1556881286-fc6915169721?w=400&h=300&fit=crop",
+    80:"https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&h=300&fit=crop",
+    // BOLOS 81-120
+    81:"https://images.unsplash.com/photo-1586788680434-30cfe7a8d5b6?w=400&h=300&fit=crop",
+    82:"https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop",
+    83:"https://images.unsplash.com/photo-1565958011703-44ad092f6d9c?w=400&h=300&fit=crop",
+    84:"https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?w=400&h=300&fit=crop",
+    85:"https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=400&h=300&fit=crop",
+    86:"https://images.unsplash.com/photo-1519340333755-56e9c1d04579?w=400&h=300&fit=crop",
+    87:"https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=400&h=300&fit=crop",
+    88:"https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&h=300&fit=crop",
+    89:"https://images.unsplash.com/photo-1586788680434-30cfe7a8d5b6?w=400&h=300&fit=crop",
+    90:"https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop",
+    91:"https://images.unsplash.com/photo-1565958011703-44ad092f6d9c?w=400&h=300&fit=crop",
+    92:"https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?w=400&h=300&fit=crop",
+    93:"https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=400&h=300&fit=crop",
+    94:"https://images.unsplash.com/photo-1519340333755-56e9c1d04579?w=400&h=300&fit=crop",
+    95:"https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=400&h=300&fit=crop",
+    96:"https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&h=300&fit=crop",
+    97:"https://images.unsplash.com/photo-1586788680434-30cfe7a8d5b6?w=400&h=300&fit=crop",
+    98:"https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop",
+    99:"https://images.unsplash.com/photo-1565958011703-44ad092f6d9c?w=400&h=300&fit=crop",
+    100:"https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?w=400&h=300&fit=crop",
+    101:"https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=400&h=300&fit=crop",
+    102:"https://images.unsplash.com/photo-1519340333755-56e9c1d04579?w=400&h=300&fit=crop",
+    103:"https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=400&h=300&fit=crop",
+    104:"https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&h=300&fit=crop",
+    105:"https://images.unsplash.com/photo-1586788680434-30cfe7a8d5b6?w=400&h=300&fit=crop",
+    106:"https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop",
+    107:"https://images.unsplash.com/photo-1565958011703-44ad092f6d9c?w=400&h=300&fit=crop",
+    108:"https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?w=400&h=300&fit=crop",
+    109:"https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=400&h=300&fit=crop",
+    110:"https://images.unsplash.com/photo-1519340333755-56e9c1d04579?w=400&h=300&fit=crop",
+    111:"https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=400&h=300&fit=crop",
+    112:"https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&h=300&fit=crop",
+    113:"https://images.unsplash.com/photo-1586788680434-30cfe7a8d5b6?w=400&h=300&fit=crop",
+    114:"https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop",
+    115:"https://images.unsplash.com/photo-1565958011703-44ad092f6d9c?w=400&h=300&fit=crop",
+    116:"https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?w=400&h=300&fit=crop",
+    117:"https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=400&h=300&fit=crop",
+    118:"https://images.unsplash.com/photo-1519340333755-56e9c1d04579?w=400&h=300&fit=crop",
+    119:"https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=400&h=300&fit=crop",
+    120:"https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&h=300&fit=crop",
+    // SORVETES 121-150
+    121:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    122:"https://images.unsplash.com/photo-1546548970-71785318a17b?w=400&h=300&fit=crop",
+    123:"https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=400&h=300&fit=crop",
+    124:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    125:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    126:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    127:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    128:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    129:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    130:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    131:"https://images.unsplash.com/photo-1546548970-71785318a17b?w=400&h=300&fit=crop",
+    132:"https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=400&h=300&fit=crop",
+    133:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    134:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    135:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    136:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    137:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    138:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    139:"https://images.unsplash.com/photo-1546548970-71785318a17b?w=400&h=300&fit=crop",
+    140:"https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=400&h=300&fit=crop",
+    141:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    142:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    143:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    144:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    145:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    146:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    147:"https://images.unsplash.com/photo-1546548970-71785318a17b?w=400&h=300&fit=crop",
+    148:"https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=400&h=300&fit=crop",
+    149:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    150:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop",
+    // SALGADOS 151-210
+    151:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    152:"https://images.unsplash.com/photo-1598215439218-5a5d24f5c3c3?w=400&h=300&fit=crop",
+    153:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    154:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    155:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    156:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    157:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    158:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    159:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    160:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    161:"https://images.unsplash.com/photo-1555507036-ab1f403802ba?w=400&h=300&fit=crop",
+    162:"https://images.unsplash.com/photo-1555507036-ab1f403802ba?w=400&h=300&fit=crop",
+    163:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    164:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    165:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    166:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    167:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    168:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    169:"https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop",
+    170:"https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400&h=300&fit=crop",
+    171:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    172:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    173:"https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&h=300&fit=crop",
+    174:"https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&h=300&fit=crop",
+    175:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    176:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    177:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    178:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    179:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    180:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    181:"https://images.unsplash.com/photo-1555507036-ab1f403802ba?w=400&h=300&fit=crop",
+    182:"https://images.unsplash.com/photo-1555507036-ab1f403802ba?w=400&h=300&fit=crop",
+    183:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    184:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    185:"https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop",
+    186:"https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400&h=300&fit=crop",
+    187:"https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&h=300&fit=crop",
+    188:"https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&h=300&fit=crop",
+    189:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    190:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    191:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    192:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    193:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    194:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    195:"https://images.unsplash.com/photo-1555507036-ab1f403802ba?w=400&h=300&fit=crop",
+    196:"https://images.unsplash.com/photo-1555507036-ab1f403802ba?w=400&h=300&fit=crop",
+    197:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    198:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    199:"https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop",
+    200:"https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400&h=300&fit=crop",
+    201:"https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&h=300&fit=crop",
+    202:"https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&h=300&fit=crop",
+    203:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    204:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    205:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    206:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    207:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    208:"https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    209:"https://images.unsplash.com/photo-1555507036-ab1f403802ba?w=400&h=300&fit=crop",
+    210:"https://images.unsplash.com/photo-1555507036-ab1f403802ba?w=400&h=300&fit=crop",
+    // ROUPAS 211-250
+    211:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop",
+    212:"https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=300&fit=crop",
+    213:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=300&fit=crop",
+    214:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop",
+    215:"https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=300&fit=crop",
+    216:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=300&fit=crop",
+    217:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop",
+    218:"https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=300&fit=crop",
+    219:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=300&fit=crop",
+    220:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop",
+    221:"https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=300&fit=crop",
+    222:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=300&fit=crop",
+    223:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop",
+    224:"https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=300&fit=crop",
+    225:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=300&fit=crop",
+    226:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop",
+    227:"https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=300&fit=crop",
+    228:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=300&fit=crop",
+    229:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop",
+    230:"https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=300&fit=crop",
+    231:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=300&fit=crop",
+    232:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop",
+    233:"https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=300&fit=crop",
+    234:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=300&fit=crop",
+    235:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop",
+    236:"https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=300&fit=crop",
+    237:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=300&fit=crop",
+    238:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop",
+    239:"https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=300&fit=crop",
+    240:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=300&fit=crop",
+    241:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop",
+    242:"https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=300&fit=crop",
+    243:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=300&fit=crop",
+    244:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop",
+    245:"https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=300&fit=crop",
+    246:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=300&fit=crop",
+    247:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop",
+    248:"https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=300&fit=crop",
+    249:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=300&fit=crop",
+    250:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop"
+};
+
+// ==================== CATÁLOGO MEGA (250 PRODUTOS) ====================
+const products = [
+// ═══════════════════════════════════════════════════════════
+// SUCOS NATURAIS (80 produtos) — IDs 1-80
+// ═══════════════════════════════════════════════════════════
+{id:1,name:"Detox Verde",price:12.90,category:"suco",desc:"Couve, limão, gengibre e maçã verde. Poderoso antioxidante.",tags:["detox","saúde"]},
+{id:2,name:"Açaí Power",price:14.90,category:"suco",desc:"Açaí puro com banana e granola. Energia da Amazônia.",tags:["energia","superfood"]},
+{id:3,name:"Maracujá com Manga",price:11.90,category:"suco",desc:"Mistura tropical refrescante com toque de hortelã.",tags:["tropical","refrescante"]},
+{id:4,name:"Morango Banana",price:10.90,category:"suco",desc:"Clássico irresistível com morangos frescos e banana madura.",tags:["clássico","cremoso"]},
+{id:5,name:"Laranja com Cenoura",price:9.90,category:"suco",desc:"Fonte de vitamina C e beta-caroteno. Sabor marcante.",tags:["vitaminas","imunidade"]},
+{id:6,name:"Abacaxi com Hortelã",price:11.50,category:"suco",desc:"Refrescância do abacaxi com toque fresco da hortelã.",tags:["refrescante","digestivo"]},
+{id:7,name:"Red Berry",price:13.90,category:"suco",desc:"Frutas vermelhas: morango, framboesa e amora.",tags:["antioxidante","premium"]},
+{id:8,name:"Tropical Glow",price:15.90,category:"suco",desc:"Manga, maracujá, coco e cúrcuma dourada.",tags:["tropical","glow"]},
+{id:9,name:"Limão Siciliano",price:8.00,category:"suco",desc:"Limão siciliano puro com água de coco. Ultra refrescante.",tags:["clássico","leve"]},
+{id:10,name:"Melancia Refrescante",price:9.50,category:"suco",desc:"Melancia natural com manjericão. Hidratação perfeita.",tags:["hidratação","verão"]},
+{id:11,name:"Kiwi Refrescante",price:10.50,category:"suco",desc:"Kiwi, maçã verde e espinafre. Verde e delicioso.",tags:["verde","fibras"]},
+{id:12,name:"Pêssego & Pera",price:11.00,category:"suco",desc:"Pêssegos maduros com pera suculenta. Doce natural.",tags:["doce","suave"]},
+{id:13,name:"Coco Tropical",price:12.00,category:"suco",desc:"Água de coco fresca com polpa de coco e abacaxi.",tags:["coco","tropical"]},
+{id:14,name:"Manga & Acerola",price:10.90,category:"suco",desc:"Vitamina C em dobro com manga doce e acerola.",tags:["vitamina C","brasileiro"]},
+{id:15,name:"Beterraba Energética",price:11.90,category:"suco",desc:"Beterraba, laranja e gengibre. Energia natural.",tags:["energia","esporte"]},
+{id:16,name:"Caju & Cajuína",price:13.50,category:"suco",desc:"Autêntico sabor do Nordeste. Caju e cajuína premium.",tags:["regional","nordeste"]},
+{id:17,name:"Goiaba Rosa",price:9.90,category:"suco",desc:"Goiaba rosa natural com leite condensado. Tradicional.",tags:["tradicional","cremoso"]},
+{id:18,name:"Cupuaçu Cremoso",price:14.50,category:"suco",desc:"Cupuaçu da Amazônia batido com leite. Cremosidade única.",tags:["amazônia","cremoso"]},
+{id:19,name:"Graviola Especial",price:13.00,category:"suco",desc:"Graviola selecionada com leite de amêndoas. Exótico.",tags:["exótico","premium"]},
+{id:20,name:"Jabuticaba Negra",price:15.90,category:"suco",desc:"Jabuticabas frescas com mel. Antioxidante potente.",tags:["raro","antioxidante"]},
+{id:21,name:"Pitaya Dragon",price:16.90,category:"suco",desc:"Pitaya rosa com banana e leite de coco. Instagramável.",tags:["trend","visual"]},
+{id:22,name:"Laranja & Gengibre",price:9.50,category:"suco",desc:"Laranja valência com gengibre fresco. Imunidade fortalecida.",tags:["imunidade","cítrico"]},
+{id:23,name:"Maçã Verde & Pepino",price:10.00,category:"suco",desc:"Refrescância extrema com pepino e maçã verde.",tags:["detox","leve"]},
+{id:24,name:"Romã Rubi",price:17.90,category:"suco",desc:"Suco de romã 100% puro. O elixir da juventude.",tags:["premium","superfood"]},
+{id:25,name:"Carambola Estrela",price:12.50,category:"suco",desc:"Carambolas selecionadas com laranja. Visual deslumbrante.",tags:["visual","exótico"]},
+{id:26,name:"Frutas Vermelhas",price:14.00,category:"suco",desc:"Blend exclusivo de frutas vermelhas da estação.",tags:["blend","saúde"]},
+{id:27,name:"Mamão & Laranja",price:9.00,category:"suco",desc:"Mamão papaia com laranja. Digestão leve e saborosa.",tags:["digestivo","clássico"]},
+{id:28,name:"Uva & Maçã",price:10.90,category:"suco",desc:"Uvas roxas com maçã gala. Sabor sofisticado.",tags:["sofisticado","uva"]},
+{id:29,name:"Tangerina & Cúrcuma",price:11.50,category:"suco",desc:"Tangerina doce com cúrcuma dourada. Anti-inflamatório.",tags:["saúde","dourado"]},
+{id:30,name:"Smoothie Proteico",price:18.00,category:"suco",desc:"Whey protein, banana, pasta de amendoim e leite.",tags:["fitness","proteico"]},
+{id:31,name:"Cajú Tropical",price:10.50,category:"suco",desc:"Caju natural com laranja e um toque de limão.",tags:["tropical","vitamina C"]},
+{id:32,name:"Frutas Amarelas",price:11.90,category:"suco",desc:"Manga, maracujá, caju e banana. Energia solar.",tags:["energia","amarelo"]},
+{id:33,name:"Verde Power",price:13.50,category:"suco",desc:"Espinafre, couve, pepino, limão e gengibre. Detox intenso.",tags:["detox","power"]},
+{id:34,name:"Cítrico Supreme",price:12.00,category:"suco",desc:"Laranja, limão, tangerina e toranja. Explosão cítrica.",tags:["cítrico","supreme"]},
+{id:35,name:"Berry Blast",price:15.50,category:"suco",desc:"Mirtilo, amora, framboesa e morango. Antioxidante máximo.",tags:["berry","blast"]},
+{id:36,name:"Melão & Menta",price:10.00,category:"suco",desc:"Melão cantalupo com folhas de menta fresca.",tags:["refrescante","melão"]},
+{id:37,name:"Pera & Gengibre",price:11.50,category:"suco",desc:"Pera suculenta com gengibre e limão. Digestivo natural.",tags:["digestivo","pera"]},
+{id:38,name:"Cajuína Premium",price:14.00,category:"suco",desc:"Cajuína artesanal do Ceará. Tradição nordestina.",tags:["regional","premium"]},
+{id:39,name:"Mix de Cítricos",price:9.90,category:"suco",desc:"Laranja, limão e tangerina. Clássico refrescante.",tags:["clássico","cítrico"]},
+{id:40,name:"Suco de Acerola",price:8.50,category:"suco",desc:"Acerola 100% natural. Vitamina C pura.",tags:["vitamina C","natural"]},
+{id:41,name:"Framboesa & Lichia",price:16.50,category:"suco",desc:"Framboesa doce com lichia exótica. Sofisticado.",tags:["exótico","sofisticado"]},
+{id:42,name:"Manga & Coco",price:12.90,category:"suco",desc:"Manga madura com leite de coco. Tropical e cremoso.",tags:["tropical","cremoso"]},
+{id:43,name:"Suco de Tomate",price:9.00,category:"suco",desc:"Tomates selecionados com manjericão e sal rosa.",tags:["saudável","tomate"]},
+{id:44,name:"Abacaxi & Gengibre",price:11.00,category:"suco",desc:"Abacaxi dourado com gengibre fresco. Anti-inflamatório.",tags:["anti-inflamatório","abacaxi"]},
+{id:45,name:"Cereja & Maçã",price:14.50,category:"suco",desc:"Cerejas selecionadas com maçã verde. Doce e azedo.",tags:["cereja","equilibrado"]},
+{id:46,name:"Suco de Amora",price:13.00,category:"suco",desc:"Amoras frescas com mel orgânico. Antioxidante.",tags:["amora","orgânico"]},
+{id:47,name:"Maracujá & Laranja",price:10.50,category:"suco",desc:"Maracujá azedo com laranja doce. Harmonia perfeita.",tags:["harmonia","clássico"]},
+{id:48,name:"Mix Tropical",price:13.50,category:"suco",desc:"Abacaxi, manga, coco e maracujá. Férias no copo.",tags:["tropical","férias"]},
+{id:49,name:"Suco de Cranberry",price:15.00,category:"suco",desc:"Cranberry 100% puro. Saúde urinária e antioxidante.",tags:["cranberry","saúde"]},
+{id:50,name:"Pêssego & Maracujá",price:12.00,category:"suco",desc:"Pêssego doce com maracujá azedo. Contrastes perfeitos.",tags:["contraste","doce"]},
+{id:51,name:"Suco de Groselha",price:14.00,category:"suco",desc:"Groselha negra com maçã. Sabor europeu refinado.",tags:["europeu","refinado"]},
+{id:52,name:"Banana & Cacau",price:13.50,category:"suco",desc:"Banana madura com cacau em pó. Energia e sabor.",tags:["energia","cacau"]},
+{id:53,name:"Suco de Figo",price:11.50,category:"suco",desc:"Figos maduros com mel e limão. Mediterrâneo.",tags:["mediterrâneo","figo"]},
+{id:54,name:"Limonada Rosa",price:10.00,category:"suco",desc:"Limão siciliano com xarope de rosas. Visual único.",tags:["rosa","visual"]},
+{id:55,name:"Suco de Tâmara",price:12.50,category:"suco",desc:"Tâmaras com leite de amêndoas. Cremoso e nutritivo.",tags:["tâmara","nutritivo"]},
+{id:56,name:"Caju & Banana",price:10.50,category:"suco",desc:"Caju natural com banana. Brasileiro autêntico.",tags:["brasileiro","autêntico"]},
+{id:57,name:"Suco de Damasco",price:13.00,category:"suco",desc:"Damascos secos reidratados com laranja. Exótico.",tags:["damasco","exótico"]},
+{id:58,name:"Melancia & Morango",price:11.00,category:"suco",desc:"Melancia refrescante com morangos doces. Verão puro.",tags:["verão","refrescante"]},
+{id:59,name:"Suco de Physalis",price:16.00,category:"suco",desc:"Physalis dourado com laranja. Raro e sofisticado.",tags:["raro","physalis"]},
+{id:60,name:"Ameixa & Maçã",price:11.50,category:"suco",desc:"Ameixa preta com maçã gala. Sabor intenso.",tags:["ameixa","intenso"]},
+{id:61,name:"Suco de Noni",price:17.50,category:"suco",desc:"Noni fermentado com mel. Superfood polinésio.",tags:["noni","superfood"]},
+{id:62,name:"Laranja & Canela",price:10.50,category:"suco",desc:"Laranja quente com canela e cravo. Inverno acolhedor.",tags:["inverno","acolhedor"]},
+{id:63,name:"Suco de Camu Camu",price:18.50,category:"suco",desc:"Camu camu da Amazônia. A maior fonte de vitamina C.",tags:["amazônia","vitamina C"]},
+{id:64,name:"Papaia & Laranja",price:9.50,category:"suco",desc:"Papaia madura com laranja valência. Digestão leve.",tags:["digestivo","papaia"]},
+{id:65,name:"Suco de Araticum",price:15.00,category:"suco",desc:"Araticum do Cerrado com leite. Fruta rara brasileira.",tags:["cerrado","raro"]},
+{id:66,name:"Morango & Kiwi",price:12.00,category:"suco",desc:"Morangos vermelhos com kiwi verde. Contraste visual.",tags:["visual","contraste"]},
+{id:67,name:"Suco de Buriti",price:14.50,category:"suco",desc:"Buriti do Pantanal com laranja. Rico em betacaroteno.",tags:["pantanal","buriti"]},
+{id:68,name:"Caju & Morango",price:11.50,category:"suco",desc:"Caju tropical com morangos frescos. Combinação única.",tags:["tropical","combinação"]},
+{id:69,name:"Suco de Umbu",price:13.00,category:"suco",desc:"Umbu do sertão baiano com mel. Sabor do Nordeste.",tags:["sertão","umbu"]},
+{id:70,name:"Abacaxi & Coco",price:12.00,category:"suco",desc:"Abacaxi dourado com leite de coco. Piña colada natural.",tags:["piña","colada"]},
+{id:71,name:"Suco de Cagaita",price:15.50,category:"suco",desc:"Cagaita do Cerrado com laranja. Fruta endêmica.",tags:["cerrado","endêmica"]},
+{id:72,name:"Manga & Hortelã",price:11.00,category:"suco",desc:"Manga madura com hortelã fresca. Refrescância tropical.",tags:["tropical","hortelã"]},
+{id:73,name:"Suco de Bacuri",price:14.00,category:"suco",desc:"Bacuri do Pará com leite. Cremosidade amazônica.",tags:["pará","bacuri"]},
+{id:74,name:"Laranja & Acerola",price:9.50,category:"suco",desc:"Laranja doce com acerola azeda. Vitamina C dupla.",tags:["vitamina C","dupla"]},
+{id:75,name:"Suco de Pequi",price:16.00,category:"suco",desc:"Pequi do Cerrado com laranja. Sabor marcante.",tags:["cerrado","pequi"]},
+{id:76,name:"Maracujá & Coco",price:12.50,category:"suco",desc:"Maracujá azedo com leite de coco. Equilíbrio perfeito.",tags:["equilíbrio","coco"]},
+{id:77,name:"Suco de Jenipapo",price:15.00,category:"suco",desc:"Jenipapo com mel e limão. Fruta do cerrado.",tags:["jenipapo","cerrado"]},
+{id:78,name:"Banana & Morango",price:10.50,category:"suco",desc:"Banana madura com morangos frescos. Clássico renovado.",tags:["clássico","renovado"]},
+{id:79,name:"Suco de Seriguela",price:13.50,category:"suco",desc:"Seriguela com laranja e gengibre. Sabor nordestino.",tags:["nordeste","seriguela"]},
+{id:80,name:"Mix Energético",price:16.50,category:"suco",desc:"Açaí, banana, guaraná e mel. Energia natural total.",tags:["energia","total"]},
+
+// ═══════════════════════════════════════════════════════════
+// BOLOS PREMIUM (40 produtos) — IDs 81-120
+// ═══════════════════════════════════════════════════════════
+{id:81,name:"Red Velvet Premium",price:89.90,category:"bolo",desc:"Camadas de veludo vermelho com cream cheese artesanal. 1kg.",tags:["premium","clássico"]},
+{id:82,name:"Ninho com Nutella",price:79.90,category:"bolo",desc:"Massa de leite Ninho recheada com Nutella premium. 1kg.",tags:["cremoso","best-seller"]},
+{id:83,name:"Pistache Italiano",price:94.90,category:"bolo",desc:"Pasta de pistache siciliano com massa amanteigada. 1kg.",tags:["importado","sofisticado"]},
+{id:84,name:"Chocolate Belga 70%",price:85.90,category:"bolo",desc:"Ganache de chocolate belga Callebaut 70% cacau. 1kg.",tags:["chocolate","intenso"]},
+{id:85,name:"Cenoura Brigadeiro",price:69.90,category:"bolo",desc:"Massa de cenoura úmida com brigadeiro gourmet. 1kg.",tags:["tradicional","brasileiro"]},
+{id:86,name:"Limão Siciliano",price:72.90,category:"bolo",desc:"Massa leve de limão com cobertura de merengue. 1kg.",tags:["cítrico","refrescante"]},
+{id:87,name:"Coco & Doce de Leite",price:65.90,category:"bolo",desc:"Massa de coco com recheio de doce de leite caseiro. 1kg.",tags:["coco","caseiro"]},
+{id:88,name:"Oreo Cookies",price:75.90,category:"bolo",desc:"Massa de baunilha com pedaços de Oreo e mousse. 1kg.",tags:["cookies","trend"]},
+{id:89,name:"Tiramisú Clássico",price:82.90,category:"bolo",desc:"Café espresso, mascarpone e cacau em pó. Receita italiana. 1kg.",tags:["italiano","café"]},
+{id:90,name:"Cheesecake Nova York",price:78.90,category:"bolo",desc:"Cream cheese com calda de frutas vermelhas. 1kg.",tags:["new york","clássico"]},
+{id:91,name:"Bolo de Matcha",price:88.90,category:"bolo",desc:"Chá verde matcha importado do Japão com massa fofa. 1kg.",tags:["matcha","japonês"]},
+{id:92,name:"Bolo de Cenoura Trufado",price:74.90,category:"bolo",desc:"Cenoura com cobertura de ganache trufada. 1kg.",tags:["trufado","chocolate"]},
+{id:93,name:"Bolo Floresta Negra",price:86.90,category:"bolo",desc:"Chocolate, cerejas e chantilly. Clássico alemão. 1kg.",tags:["alemão","cereja"]},
+{id:94,name:"Bolo de Banana com Nozes",price:62.90,category:"bolo",desc:"Banana madura com nozes caramelizadas. Caseiro. 1kg.",tags:["banana","caseiro"]},
+{id:95,name:"Bolo de Fubá com Goiabada",price:58.90,category:"bolo",desc:"Fubá mineiro com goiabada cascão. Tradição brasileira. 1kg.",tags:["mineiro","tradicional"]},
+{id:96,name:"Bolo de Laranja com Açúcar Mascavo",price:64.90,category:"bolo",desc:"Laranja orgânica com açúcar mascavo. Rústico. 1kg.",tags:["orgânico","rústico"]},
+{id:97,name:"Bolo de Maracujá",price:68.90,category:"bolo",desc:"Massa de maracujá com calda azeda. Tropical. 1kg.",tags:["maracujá","tropical"]},
+{id:98,name:"Bolo de Abacaxi Caramelizado",price:76.90,category:"bolo",desc:"Abacaxi caramelizado com massa de baunilha. 1kg.",tags:["abacaxi","caramelizado"]},
+{id:99,name:"Bolo de Café com Chocolate",price:71.90,category:"bolo",desc:"Café forte com camadas de chocolate. Intenso. 1kg.",tags:["café","intenso"]},
+{id:100,name:"Bolo de Churros",price:69.90,category:"bolo",desc:"Canela, doce de leite e açúcar com canela. 1kg.",tags:["churros","canela"]},
+{id:101,name:"Bolo de Coco Queimado",price:66.90,category:"bolo",desc:"Coco tostado com leite condensado. Sabor marcante. 1kg.",tags:["coco","queimado"]},
+{id:102,name:"Bolo de Amendoim",price:63.90,category:"bolo",desc:"Pasta de amendoim com cobertura de chocolate. 1kg.",tags:["amendoim","americano"]},
+{id:103,name:"Bolo de Maçã com Canela",price:67.90,category:"bolo",desc:"Maçãs caramelizadas com canela. Aconchegante. 1kg.",tags:["maçã","acolhedor"]},
+{id:104,name:"Bolo de Pera com Vinho",price:79.90,category:"bolo",desc:"Peras ao vinho tinto com massa amanteigada. Sofisticado. 1kg.",tags:["vinho","sofisticado"]},
+{id:105,name:"Bolo de Frutas Cristalizadas",price:84.90,category:"bolo",desc:"Frutas cristalizadas com especiarias. Natalino. 1kg.",tags:["natal","frutas"]},
+{id:106,name:"Bolo de Chocolate Branco",price:77.90,category:"bolo",desc:"Chocolate branco belga com framboesas. Delicado. 1kg.",tags:["branco","delicado"]},
+{id:107,name:"Bolo de Cerveja Preta",price:73.90,category:"bolo",desc:"Cerveja stout com chocolate amargo. Irlandês. 1kg.",tags:["cerveja","irlandês"]},
+{id:108,name:"Bolo de Aipim com Coco",price:59.90,category:"bolo",desc:"Aipim ralado com coco fresco. Nordestino. 1kg.",tags:["aipim","nordeste"]},
+{id:109,name:"Bolo de Nozes com Mel",price:81.90,category:"bolo",desc:"Nozes pecã com mel orgânico. Rica textura. 1kg.",tags:["nozes","mel"]},
+{id:110,name:"Bolo de Laranja com Poppy",price:70.90,category:"bolo",desc:"Laranja com sementes de papoula. Visual único. 1kg.",tags:["poppy","visual"]},
+{id:111,name:"Bolo de Morango com Chantilly",price:83.90,category:"bolo",desc:"Morangos frescos com chantilly artesanal. 1kg.",tags:["morango","chantilly"]},
+{id:112,name:"Bolo de Damasco com Amêndoas",price:87.90,category:"bolo",desc:"Damascos turcos com amêndoas laminadas. 1kg.",tags:["damasco","turco"]},
+{id:113,name:"Bolo de Cacau com Avelã",price:80.90,category:"bolo",desc:"Cacau 100% com pasta de avelã. Intenso. 1kg.",tags:["cacau","avelã"]},
+{id:114,name:"Bolo de Lichia com Rosas",price:91.90,category:"bolo",desc:"Lichia com água de rosas. Exótico e floral. 1kg.",tags:["lichia","floral"]},
+{id:115,name:"Bolo de Abóbora com Especiarias",price:65.90,category:"bolo",desc:"Abóbora kabotiá com canela e noz-moscada. Outono. 1kg.",tags:["abóbora","outono"]},
+{id:116,name:"Bolo de Gin & Tônica",price:92.90,category:"bolo",desc:"Gin infusão com limão e zimbro. Adulto. 1kg.",tags:["gin","adulto"]},
+{id:117,name:"Bolo de Cereja com Chocolate",price:85.90,category:"bolo",desc:"Cerejas frescas com ganache de chocolate. 1kg.",tags:["cereja","ganache"]},
+{id:118,name:"Bolo de Limão com Blueberry",price:72.90,category:"bolo",desc:"Limão siciliano com blueberries frescas. 1kg.",tags:["blueberry","fresco"]},
+{id:119,name:"Bolo de Café com Baunilha",price:68.90,category:"bolo",desc:"Café arábica com creme de baunilha. Clássico. 1kg.",tags:["arábica","baunilha"]},
+{id:120,name:"Bolo de Brownie",price:75.90,category:"bolo",desc:"Brownie denso com nozes e caramelo. Americano. 1kg.",tags:["brownie","denso"]},
+
+// ═══════════════════════════════════════════════════════════
+// SORVETES ARTESANAIS (30 produtos) — IDs 121-150
+// ═══════════════════════════════════════════════════════════
+{id:121,name:"Gelato Pistache",price:18.90,category:"sorvete",desc:"Gelato artesanal de pistache siciliano com flocos reais.",tags:["artesanal","italiano"]},
+{id:122,name:"Sorvete de Açaí",price:16.90,category:"sorvete",desc:"Açaí puro da Amazônia com tapioca e granola.",tags:["brasileiro","natural"]},
+{id:123,name:"Chocolate 70%",price:15.90,category:"sorvete",desc:"Chocolate belga intenso com lascas de cacau.",tags:["intenso","premium"]},
+{id:124,name:"Maracujá Tropical",price:14.90,category:"sorvete",desc:"Sorbet de maracujá com polpa natural. Ácido e doce.",tags:["sorbet","tropical"]},
+{id:125,name:"Creme de Ninho",price:13.90,category:"sorvete",desc:"Cremoso de leite Ninho com pedaços de leite em pó.",tags:["cremoso","brasileiro"]},
+{id:126,name:"Floresta Negra",price:17.90,category:"sorvete",desc:"Chocolate com cerejas frescas e chantilly artesanal.",tags:["clássico","europeu"]},
+{id:127,name:"Doce de Leite",price:13.50,category:"sorvete",desc:"Sorvete de doce de leite argentino com crocante.",tags:["doce","argentino"]},
+{id:128,name:"Menta & Chocolate",price:15.50,category:"sorvete",desc:"Menta fresca com lascas de chocolate meio amargo.",tags:["refrescante","clássico"]},
+{id:129,name:"Caramelo Salgado",price:16.50,category:"sorvete",desc:"Caramelo artesanal com flor de sal. Equilíbrio perfeito.",tags:["gourmet","salgado"]},
+{id:130,name:"Coco & Amêndoas",price:14.50,category:"sorvete",desc:"Coco cremoso com amêndoas caramelizadas crocantes.",tags:["coco","crocante"]},
+{id:131,name:"Baunilha Bourbon",price:15.00,category:"sorvete",desc:"Favas de baunilha bourbon de Madagascar. Premium.",tags:["bourbon","madagascar"]},
+{id:132,name:"Frutas Vermelhas",price:14.00,category:"sorvete",desc:"Sorbet de frutas vermelhas da estação. Natural.",tags:["sorbet","vermelhas"]},
+{id:133,name:"Café Expresso",price:15.50,category:"sorvete",desc:"Café espresso forte com lascas de chocolate. Intenso.",tags:["café","expresso"]},
+{id:134,name:"Tiramisú Gelado",price:17.50,category:"sorvete",desc:"Sorvete de mascarpone com café e cacau. Italiano.",tags:["tiramisú","mascarpone"]},
+{id:135,name:"Pistache & Rose",price:19.50,category:"sorvete",desc:"Pistache com água de rosas. Sofisticado e floral.",tags:["rose","sofisticado"]},
+{id:136,name:"Banana Split",price:16.00,category:"sorvete",desc:"Banana, chocolate, morango e baunilha. Clássico.",tags:["split","clássico"]},
+{id:137,name:"Cheesecake Gelado",price:17.00,category:"sorvete",desc:"Cream cheese com calda de frutas vermelhas. 1 bola.",tags:["cheesecake","gelado"]},
+{id:138,name:"Matcha Green Tea",price:18.00,category:"sorvete",desc:"Chá verde matcha importado do Japão. Exótico.",tags:["matcha","japonês"]},
+{id:139,name:"Açaí com Guaraná",price:15.50,category:"sorvete",desc:"Açaí com extrato de guaraná. Energia amazônica.",tags:["guaraná","energia"]},
+{id:140,name:"Pêssego em Calda",price:14.50,category:"sorvete",desc:"Pêssegos em calda com creme de baunilha. Doce.",tags:["pêssego","calda"]},
+{id:141,name:"Chocolate Branco",price:15.00,category:"sorvete",desc:"Chocolate branco belga com pedaços de brownie.",tags:["branco","brownie"]},
+{id:142,name:"Limão Siciliano Sorbet",price:13.50,category:"sorvete",desc:"Sorbet de limão siciliano com raspas. Refrescante.",tags:["sorbet","siciliano"]},
+{id:143,name:"Nutella Swirl",price:17.50,category:"sorvete",desc:"Baunilha com swirl de Nutella. Irresistível.",tags:["nutella","swirl"]},
+{id:144,name:"Cereja & Amêndoa",price:16.50,category:"sorvete",desc:"Cerejas com pasta de amêndoa. Clássico europeu.",tags:["cereja","europeu"]},
+{id:145,name:"Coco & Abacaxi",price:14.00,category:"sorvete",desc:"Coco com pedaços de abacaxi. Tropical refrescante.",tags:["abacaxi","tropical"]},
+{id:146,name:"Romeu & Julieta",price:15.00,category:"sorvete",desc:"Goiabada com queijo cremoso. Brasileiro autêntico.",tags:["romeu","goiabada"]},
+{id:147,name:"Brownie Dough",price:16.00,category:"sorvete",desc:"Massa de brownie com pedaços de chocolate. Trend.",tags:["dough","trend"]},
+{id:148,name:"Lavender Honey",price:18.50,category:"sorvete",desc:"Mel com lavanda francesa. Floral e delicado.",tags:["lavender","floral"]},
+{id:149,name:"Manga & Chili",price:15.50,category:"sorvete",desc:"Manga doce com toque de pimenta chili. Surpreendente.",tags:["chili","surpreendente"]},
+{id:150,name:"Affogato Premium",price:19.00,category:"sorvete",desc:"Baunilha com shot de espresso quente. Italiano.",tags:["affogato","espresso"]},
+
+// ═══════════════════════════════════════════════════════════
+// SALGADOS (60 produtos) — IDs 151-210
+// ═══════════════════════════════════════════════════════════
+{id:151,name:"Coxinha de Frango",price:7.90,category:"salgado",desc:"Massa crocante com frango desfiado temperado. 3 un.",tags:["tradicional","festa"]},
+{id:152,name:"Pão de Queijo",price:6.50,category:"salgado",desc:"Queijo minas e parmesão. Crocante por fora, macio dentro. 5 un.",tags:["mineiro","gluten-free"]},
+{id:153,name:"Esfirra de Carne",price:8.90,category:"salgado",desc:"Massa síria com carne moída temperada árabe. 2 un.",tags:["árabe","suculento"]},
+{id:154,name:"Rissole de Queijo",price:7.50,category:"salgado",desc:"Recheio de queijo coalho com orégano. 3 un.",tags:["queijo","festa"]},
+{id:155,name:"Kibe Frito",price:6.90,category:"salgado",desc:"Trigo para quibe com carne e hortelã. 3 un.",tags:["árabe","tradicional"]},
+{id:156,name:"Bolinho de Bacalhau",price:9.90,category:"salgado",desc:"Bacalhau desfiado com batata e salsa. 2 un.",tags:["português","premium"]},
+{id:157,name:"Pastel de Carne",price:8.00,category:"salgado",desc:"Massa folhada crocante com carne temperada. 2 un.",tags:["folhado","clássico"]},
+{id:158,name:"Empada de Palmito",price:7.90,category:"salgado",desc:"Palmito premium com catupiry em massa amanteigada.",tags:["vegetariano","cremoso"]},
+{id:159,name:"Trouxinha de Ricota",price:6.50,category:"salgado",desc:"Massa fina com ricota temperada e espinafre. 3 un.",tags:["vegetariano","leve"]},
+{id:160,name:"Croissant de Presunto",price:10.90,category:"salgado",desc:"Croissant francês com presunto de parma e queijo.",tags:["francês","café"]},
+{id:161,name:"Quiche Lorraine",price:11.90,category:"salgado",desc:"Bacon, queijo gruyère e creme de leite fresco. Fatia.",tags:["francês","sophisticado"]},
+{id:162,name:"Enroladinho de Salsicha",price:5.00,category:"salgado",desc:"Massa folhada com salsicha premium. 2 un.",tags:["kids","econômico"]},
+{id:163,name:"Torta de Frango",price:9.50,category:"salgado",desc:"Frango desfiado com catupiry em massa podre. Fatia.",tags:["caseira","suculento"]},
+{id:164,name:"Folhado de Calabresa",price:8.50,category:"salgado",desc:"Calabresa defumada com queijo em massa folhada. 2 un.",tags:["picante","salgado"]},
+{id:165,name:"Croquete de Carne",price:6.90,category:"salgado",desc:"Carne moída temperada empanada e frita. 3 un.",tags:["tradicional","festa"]},
+{id:166,name:"Mini Pizza Margherita",price:7.00,category:"salgado",desc:"Massa fina com molho de tomate, mussarela e manjericão.",tags:["italiano","mini"]},
+{id:167,name:"Bruschetta Caprese",price:9.90,category:"salgado",desc:"Pão italiano com tomate, mussarela de búfala e manjericão.",tags:["italiano","fresco"]},
+{id:168,name:"Tapioca de Queijo",price:8.00,category:"salgado",desc:"Tapioca recheada com queijo coalho e requeijão.",tags:["nordestino","gluten-free"]},
+{id:169,name:"Cachorro Quente Gourmet",price:12.00,category:"salgado",desc:"Salsicha artesanal com molhos especiais e crispy onion.",tags:["gourmet","premium"]},
+{id:170,name:"Pão com Mortadela",price:11.50,category:"salgado",desc:"Pão francês com mortadela italiana e cream cheese.",tags:["sanduíche","italiano"]},
+{id:171,name:"Bolinho de Feijoada",price:8.50,category:"salgado",desc:"Feijoada completa em formato de bolinho. Brasileiro.",tags:["feijoada","brasileiro"]},
+{id:172,name:"Empada de Camarão",price:13.50,category:"salgado",desc:"Camarões selecionados com catupiry. Premium.",tags:["camarão","premium"]},
+{id:173,name:"Pastel de Belém",price:7.50,category:"salgado",desc:"Creme de confeiteiro com canela. Tradição portuguesa.",tags:["português","doce"]},
+{id:174,name:"Coxinha de Costela",price:9.50,category:"salgado",desc:"Costela desfiada com molho barbecue. Suculenta.",tags:["costela","bbq"]},
+{id:175,name:"Pão de Batata",price:5.50,category:"salgado",desc:"Massa de batata com recheio de frango cremoso.",tags:["batata","cremoso"]},
+{id:176,name:"Rissole de Camarão",price:10.50,category:"salgado",desc:"Camarão com catupiry em massa crocante. 3 un.",tags:["camarão","catupiry"]},
+{id:177,name:"Esfirra de Queijo",price:7.90,category:"salgado",desc:"Massa síria com queijo coalho e orégano. Vegetariana.",tags:["vegetariana","queijo"]},
+{id:178,name:"Bolinho de Chuva",price:4.50,category:"salgado",desc:"Massa fofinha com canela e açúcar. Tradicional.",tags:["chuva","tradicional"]},
+{id:179,name:"Torta de Palmito",price:10.00,category:"salgado",desc:"Palmito com ervas finas em massa folhada. Fatia.",tags:["ervas","folhada"]},
+{id:180,name:"Croissant de Chocolate",price:9.90,category:"salgado",desc:"Croissant francês com recheio de chocolate belga.",tags:["chocolate","francês"]},
+{id:181,name:"Quiche de Alho Poró",price:11.50,category:"salgado",desc:"Alho poró com queijo gruyère. Vegetariana.",tags:["alho poró","vegetariana"]},
+{id:182,name:"Pão de Queijo Recheado",price:7.50,category:"salgado",desc:"Pão de queijo com catupiry por dentro. 3 un.",tags:["recheado","catupiry"]},
+{id:183,name:"Pastel de Ventilador",price:6.50,category:"salgado",desc:"Massa crocante em formato de leque. Queijo.",tags:["ventilador","queijo"]},
+{id:184,name:"Coxinha de Jaca",price:8.00,category:"salgado",desc:"Jaca desfiada temperada. Vegana e deliciosa.",tags:["jaca","vegana"]},
+{id:185,name:"Mini Hambúrguer",price:9.00,category:"salgado",desc:"Hambúrguer artesanal mini com queijo e bacon.",tags:["mini","artesanal"]},
+{id:186,name:"Bruschetta de Ricota",price:8.50,category:"salgado",desc:"Ricota com tomate seco e manjericão. Vegetariana.",tags:["ricota","tomate seco"]},
+{id:187,name:"Tapioca de Coco",price:6.00,category:"salgado",desc:"Tapioca doce com coco e leite condensado.",tags:["coco","doce"]},
+{id:188,name:"Pão com Linguiça",price:10.50,category:"salgado",desc:"Linguiça artesanal com queijo derretido.",tags:["linguiça","artesanal"]},
+{id:189,name:"Bolinho de Arroz",price:5.00,category:"salgado",desc:"Arroz temperado com queijo empanado. 3 un.",tags:["arroz","econômico"]},
+{id:190,name:"Empada de Frango",price:8.50,category:"salgado",desc:"Frango desfiado com azeitonas. Clássica.",tags:["azeitona","clássica"]},
+{id:191,name:"Coxinha de Camarão",price:12.50,category:"salgado",desc:"Camarão com catupiry em massa crocante. Premium.",tags:["camarão","premium"]},
+{id:192,name:"Pastel de Forno",price:7.00,category:"salgado",desc:"Massa leve assada com recheio de palmito.",tags:["forno","assado"]},
+{id:193,name:"Rissole de Presunto",price:8.00,category:"salgado",desc:"Presunto e queijo em massa crocante. 3 un.",tags:["presunto","queijo"]},
+{id:194,name:"Esfirra de Calabresa",price:8.50,category:"salgado",desc:"Calabresa com cebola e queijo. Saborosa.",tags:["calabresa","cebola"]},
+{id:195,name:"Torta de Carne Seca",price:11.00,category:"salgado",desc:"Carne seca desfiada com catupiry. Nordestina.",tags:["carne seca","nordeste"]},
+{id:196,name:"Croissant de Amêndoas",price:10.00,category:"salgado",desc:"Croissant com recheio de pasta de amêndoas.",tags:["amêndoas","doce"]},
+{id:197,name:"Quiche de Espinafre",price:10.50,category:"salgado",desc:"Espinafre com queijo feta. Vegetariana saudável.",tags:["espinafre","feta"]},
+{id:198,name:"Pão de Queijo de Batata Doce",price:7.00,category:"salgado",desc:"Versão fit com batata doce. Sem glúten.",tags:["fit","batata doce"]},
+{id:199,name:"Pastel de Nata",price:6.50,category:"salgado",desc:"Creme de confeiteiro português. Tradicional.",tags:["nata","português"]},
+{id:200,name:"Bolinho de Carne Seca",price:8.50,category:"salgado",desc:"Carne seca com mandioca. Brasileiro autêntico.",tags:["mandioca","autêntico"]},
+{id:201,name:"Mini Hot Dog",price:6.00,category:"salgado",desc:"Salsicha com molhos e batata palha. Kids.",tags:["kids","hot dog"]},
+{id:202,name:"Bruschetta de Abobrinha",price:7.50,category:"salgado",desc:"Abobrinha grelhada com queijo parmesão.",tags:["abobrinha","grelhada"]},
+{id:203,name:"Tapioca de Frango",price:8.50,category:"salgado",desc:"Frango desfiado com catupiry na tapioca.",tags:["frango","tapioca"]},
+{id:204,name:"Pão com Chouriço",price:11.00,category:"salgado",desc:"Chouriço português grelhado com pão.",tags:["chouriço","português"]},
+{id:205,name:"Bolinho de Milho",price:5.50,category:"salgado",desc:"Milho verde com queijo coalho. Nordestino.",tags:["milho","nordeste"]},
+{id:206,name:"Empada de Camarão com Catupiry",price:14.00,category:"salgado",desc:"Camarão com catupiry cremoso. Premium.",tags:["premium","cremoso"]},
+{id:207,name:"Coxinha de Palmito",price:7.50,category:"salgado",desc:"Palmito com requeijão. Vegetariana.",tags:["palmito","vegetariana"]},
+{id:208,name:"Pastel de Queijo",price:6.00,category:"salgado",desc:"Massa crocante com queijo derretido. Clássico.",tags:["queijo","clássico"]},
+{id:209,name:"Rissole de Atum",price:9.50,category:"salgado",desc:"Atum com cream cheese. Refinado.",tags:["atum","refinado"]},
+{id:210,name:"Esfirra de Frango",price:8.00,category:"salgado",desc:"Frango desfiado com requeijão. Suculenta.",tags:["frango","requeijão"]},
+
+// ═══════════════════════════════════════════════════════════
+// ROUPAS & STREETWEAR (40 produtos) — IDs 211-250
+// ═══════════════════════════════════════════════════════════
+{id:211,name:"Camiseta Sweet Logo",price:59.90,category:"roupa",desc:"100% algodão orgânico. Logo Sweet Blend em silk rosa neon. Tam. P ao GG.",tags:["logo","básica"]},
+{id:212,name:"Camiseta Fruit Power",price:59.90,category:"roupa",desc:"Estampa exclusiva de frutas tropicais em cores vibrantes. Tam. P ao GG.",tags:["estampada","tropical"]},
+{id:213,name:"Hoodie Blend Premium",price:119.90,category:"roupa",desc:"Moletom premium com capuz. Bordado Sweet Blend dourado. Tam. P ao GG.",tags:["moletom","premium"]},
+{id:214,name:"Camiseta Detox Life",price:64.90,category:"roupa",desc:"Estampa minimalista com frase motivacional. Algodão premium. Tam. P ao GG.",tags:["minimalista","motivacional"]},
+{id:215,name:"Camiseta Juice Gang",price:69.90,category:"roupa",desc:"Estampa urbana com grafite de frutas. Streetwear. Tam. P ao GG.",tags:["streetwear","grafite"]},
+{id:216,name:"Hoodie Fruit Salad",price:129.90,category:"roupa",desc:"Moletom oversized com estampa de salada de frutas. Tam. P ao GG.",tags:["oversized","salada"]},
+{id:217,name:"Camiseta Açaí Power",price:59.90,category:"roupa",desc:"Estampa de açaí com energia elétrica. Algodão orgânico. Tam. P ao GG.",tags:["açaí","elétrica"]},
+{id:218,name:"Camiseta Tropical Vibes",price:64.90,category:"roupa",desc:"Palm trees e frutas em tons pastel. Verão eterno. Tam. P ao GG.",tags:["pastel","verão"]},
+{id:219,name:"Hoodie Dark Mode",price:139.90,category:"roupa",desc:"Moletom preto com logo reflexivo. Night edition. Tam. P ao GG.",tags:["reflexivo","night"]},
+{id:220,name:"Camiseta Smoothie Bowl",price:59.90,category:"roupa",desc:"Estampa de bowl de açaí colorido. Foodie style. Tam. P ao GG.",tags:["foodie","bowl"]},
+{id:221,name:"Camiseta Berry Blast",price:64.90,category:"roupa",desc:"Explosão de frutas vermelhas em estampa. Vibrante. Tam. P ao GG.",tags:["berry","vibrante"]},
+{id:222,name:"Hoodie Citrus Fresh",price:124.90,category:"roupa",desc:"Moletom amarelo com estampa de limões. Energia pura. Tam. P ao GG.",tags:["citrus","energia"]},
+{id:223,name:"Camiseta Green Juice",price:59.90,category:"roupa",desc:"Estampa de suco verde detox. Lifestyle saudável. Tam. P ao GG.",tags:["detox","lifestyle"]},
+{id:224,name:"Camiseta Watermelon Sugar",price:69.90,category:"roupa",desc:"Melancia em estilo pop art. Colorida e divertida. Tam. P ao GG.",tags:["pop art","melancia"]},
+{id:225,name:"Hoodie Coco Loco",price:119.90,category:"roupa",desc:"Moletom com estampa de coco tropical. Beach vibes. Tam. P ao GG.",tags:["coco","beach"]},
+{id:226,name:"Camiseta Mango Tango",price:59.90,category:"roupa",desc:"Manga dançante em estampa animada. Divertida. Tam. P ao GG.",tags:["manga","animada"]},
+{id:227,name:"Camiseta Pitaya Dream",price:64.90,category:"roupa",desc:"Pitaya rosa em estampa surreal. Instagramável. Tam. P ao GG.",tags:["pitaya","surreal"]},
+{id:228,name:"Hoodie Guaraná Energy",price:129.90,category:"roupa",desc:"Moletom com estampa de guaraná e raios. Energia. Tam. P ao GG.",tags:["guaraná","raios"]},
+{id:229,name:"Camiseta Banana Split",price:59.90,category:"roupa",desc:"Banana com sorvete em estampa retrô. Vintage. Tam. P ao GG.",tags:["retrô","vintage"]},
+{id:230,name:"Camiseta Strawberry Fields",price:64.90,category:"roupa",desc:"Morangos em campo florido. Romântica. Tam. P ao GG.",tags:["romântica","campo"]},
+{id:231,name:"Hoodie Passion Fruit",price:124.90,category:"roupa",desc:"Moletom roxo com estampa de maracujá. Intenso. Tam. P ao GG.",tags:["roxo","intenso"]},
+{id:232,name:"Camiseta Lemonade Stand",price:59.90,category:"roupa",desc:"Limonada em estampa retrô americana. Cool. Tam. P ao GG.",tags:["limonada","retrô"]},
+{id:233,name:"Camiseta Orange Crush",price:64.90,category:"roupa",desc:"Laranja esmagada em estampa artística. Criativa. Tam. P ao GG.",tags:["artística","criativa"]},
+{id:234,name:"Hoodie Grape Escape",price:119.90,category:"roupa",desc:"Moletom com estampa de uvas e videiras. Elegante. Tam. P ao GG.",tags:["uvas","elegante"]},
+{id:235,name:"Camiseta Kiwi Slice",price:59.90,category:"roupa",desc:"Kiwi em fatias em estampa geométrica. Moderna. Tam. P ao GG.",tags:["geométrica","moderna"]},
+{id:236,name:"Camiseta Pineapple Express",price:69.90,category:"roupa",desc:"Abacaxi em estampa tropical exuberante. Festa. Tam. P ao GG.",tags:["tropical","festa"]},
+{id:237,name:"Hoodie Cherry Bomb",price:129.90,category:"roupa",desc:"Moletom vermelho com cerejas explosivas. Bold. Tam. P ao GG.",tags:["cereja","bold"]},
+{id:238,name:"Camiseta Peach Perfect",price:59.90,category:"roupa",desc:"Pêssego em estampa soft e delicada. Minimal. Tam. P ao GG.",tags:["soft","minimal"]},
+{id:239,name:"Camiseta Avocado Toast",price:64.90,category:"roupa",desc:"Abacate em estampa food trend. Millennial. Tam. P ao GG.",tags:["abacate","millennial"]},
+{id:240,name:"Hoodie Blueberry Muffin",price:124.90,category:"roupa",desc:"Moletom azul com mirtilos e muffins. Doce. Tam. P ao GG.",tags:["mirtilo","doce"]},
+{id:241,name:"Calça Jogger Sweet",price:89.90,category:"roupa",desc:"Calça jogger preta com logo bordado. Conforto e estilo. Tam. P ao GG.",tags:["jogger","conforto"]},
+{id:242,name:"Calça Cargo Fruit",price:99.90,category:"roupa",desc:"Calça cargo com estampa de frutas tropicais. Streetwear. Tam. P ao GG.",tags:["cargo","streetwear"]},
+{id:243,name:"Shorts Blend Beach",price:59.90,category:"roupa",desc:"Shorts de praia com estampa de sucos. Verão. Tam. P ao GG.",tags:["praia","verão"]},
+{id:244,name:"Calça Moletom Açaí",price:79.90,category:"roupa",desc:"Calça de moletom roxa com estampa de açaí. Confortável. Tam. P ao GG.",tags:["moletom","açaí"]},
+{id:245,name:"Calça Jeans Destroyed",price:109.90,category:"roupa",desc:"Jeans destroyed com patches de frutas. Trendy. Tam. P ao GG.",tags:["jeans","destroyed"]},
+{id:246,name:"Shorts Cargo Tropical",price:69.90,category:"roupa",desc:"Shorts cargo com estampa de folhas tropicais. Adventure. Tam. P ao GG.",tags:["adventure","folhas"]},
+{id:247,name:"Calça Legging Fit",price:79.90,category:"roupa",desc:"Legging preta com detalhes rosa neon. Fitness. Tam. P ao GG.",tags:["legging","fitness"]},
+{id:248,name:"Calça Wide Leg Fresh",price:89.90,category:"roupa",desc:"Calça wide leg com estampa de limões. Fresh. Tam. P ao GG.",tags:["wide leg","fresh"]},
+{id:249,name:"Shorts Moletom Blend",price:54.90,category:"roupa",desc:"Shorts de moletom com logo bordado. Casual. Tam. P ao GG.",tags:["casual","bordado"]},
+{id:250,name:"Calça Jogger Neon",price:94.90,category:"roupa",desc:"Calça jogger com detalhes neon pink. Night edition. Tam. P ao GG.",tags:["neon","night"]}
+];
+
+const categories = [
+    {id:'all',name:'Todos os Produtos',icon:'fa-th-large',count:250},
+    {id:'suco',name:'Sucos Naturais',icon:'fa-glass-water',count:80},
+    {id:'bolo',name:'Bolos Premium',icon:'fa-cake-candles',count:40},
+    {id:'sorvete',name:'Sorvetes Artesanais',icon:'fa-ice-cream',count:30},
+    {id:'salgado',name:'Salgados',icon:'fa-pizza-slice',count:60},
+    {id:'roupa',name:'Streetwear',icon:'fa-shirt',count:40}
+];
+
+// ==================== SEGURANÇA ====================
+function sanitizeInput(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[<>&"']/g, '').replace(/on\w+\s*=/gi, '').replace(/javascript:/gi, '').trim().substring(0, 100);
+}
+function validateUsername(name) {
+    return /^[a-zA-ZÀ-ÿ0-9\s]{2,30}$/.test(name) && name.trim().length >= 2;
+}
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ==================== LOGIN CORRIGIDO ====================
+function handleLogin() {
+    const input = document.getElementById('username-input');
+    const errorMsg = document.getElementById('login-error');
+    let username = sanitizeInput(input.value);
+
+    if (!validateUsername(username)) {
+        errorMsg.classList.remove('hidden');
+        input.classList.add('border-red-500');
+        input.parentElement.style.animation = 'shake 0.5s ease';
+        setTimeout(() => { input.parentElement.style.animation = ''; }, 500);
+        return;
+    }
+
+    errorMsg.classList.add('hidden');
+    input.classList.remove('border-red-500');
+    currentUser = username;
+
+    const loginScreen = document.getElementById('login-screen');
+    const mainApp = document.getElementById('main-app');
+
+    mainApp.classList.remove('hidden');
+    loginScreen.classList.add('hidden-screen');
+
+    setTimeout(() => {
+        loginScreen.style.display = 'none';
+        mainApp.classList.add('visible');
+
+        document.getElementById('welcome-name').textContent = `Olá, ${escapeHtml(currentUser)}!`;
+        document.getElementById('credit-balance').textContent = credit.toFixed(2);
+
+        renderCategories();
+        renderProducts();
+        showToast(`Bem-vindo, ${escapeHtml(currentUser)}! 🎉`);
+    }, 500);
+}
+
+function logout() {
+    if (confirm("Deseja realmente sair? Seu carrinho será perdido.")) {
+        location.reload();
+    }
+}
+
+// ==================== NAVEGAÇÃO ====================
+function showSection(section) {
+    const catalog = document.getElementById('catalog-section');
+    const cart = document.getElementById('cart-section');
+    const hero = document.getElementById('hero-banner');
+
+    if (section === 'catalog') {
+        catalog.classList.remove('hidden');
+        cart.classList.add('hidden');
+        hero.classList.remove('hidden');
+    } else if (section === 'cart') {
+        catalog.classList.add('hidden');
+        cart.classList.remove('hidden');
+        hero.classList.add('hidden');
+        renderCart();
+    }
+
+    document.querySelectorAll('.nav-item').forEach(el => {
+        if (el.getAttribute('data-section') === section) {
+            el.classList.add('nav-active');
+            el.classList.remove('text-zinc-400');
+        } else {
+            el.classList.remove('nav-active');
+            el.classList.add('text-zinc-400');
+        }
+    });
+}
+
+// ==================== CATEGORIAS ====================
+function renderCategories() {
+    const nav = document.getElementById('category-nav');
+    nav.innerHTML = categories.map(cat => `
+        <div onclick="filterCategory('${cat.id}')" 
+             class="category-item flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all hover:bg-white/5 ${cat.id === 'all' ? 'cat-active' : 'text-zinc-400'}" 
+             data-category="${cat.id}">
+            <i class="fa-solid ${cat.icon} w-5 text-center"></i>
+            <span class="font-medium text-sm flex-1">${cat.name}</span>
+            <span class="text-xs bg-zinc-800 px-2 py-0.5 rounded-full">${cat.count}</span>
+        </div>
+    `).join('');
+}
+
+// ==================== PRODUTOS ====================
+function renderProducts(filteredProducts = products) {
+    const grid = document.getElementById('products-grid');
+    const countEl = document.getElementById('product-count');
+
+    grid.innerHTML = '';
+    countEl.textContent = `${filteredProducts.length} produto${filteredProducts.length !== 1 ? 's' : ''} encontrado${filteredProducts.length !== 1 ? 's' : ''}`;
+
+    if (filteredProducts.length === 0) {
+        grid.innerHTML = `
+            <div class="col-span-full text-center py-20">
+                <div class="text-6xl mb-4">🔍</div>
+                <h3 class="text-xl font-semibold mb-2 text-white">Nenhum produto encontrado</h3>
+                <p class="text-zinc-500">Tente buscar com outras palavras.</p>
+            </div>
+        `;
+        return;
+    }
+
+    filteredProducts.forEach((product, index) => {
+        const imgUrl = productImages[product.id] || `https://via.placeholder.com/400x300/1a1a1a/ec4899?text=${encodeURIComponent(product.name)}`;
+
+        const card = document.createElement('div');
+        card.className = `product-card bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden stagger-item cursor-pointer`;
+        card.style.animationDelay = `${index * 0.02}s`;
+
+        card.innerHTML = `
+            <div class="h-48 relative overflow-hidden bg-zinc-800">
+                <img src="${imgUrl}" alt="${escapeHtml(product.name)}" 
+                     class="product-img w-full h-full object-cover" 
+                     loading="lazy"
+                     onerror="this.src='https://via.placeholder.com/400x300/1a1a1a/ec4899?text=${encodeURIComponent(product.name)}'">
+                <div class="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-transparent"></div>
+                <div class="absolute top-3 right-3">
+                    <span class="text-[10px] uppercase tracking-wider bg-black/60 backdrop-blur-sm px-2 py-1 rounded-lg text-zinc-300 border border-white/10">
+                        ${getCategoryLabel(product.category)}
+                    </span>
+                </div>
+            </div>
+            <div class="p-5">
+                <h3 class="font-semibold text-base mb-1 text-white">${escapeHtml(product.name)}</h3>
+                <p class="text-zinc-500 text-xs mb-3 line-clamp-2">${escapeHtml(product.desc)}</p>
+                <div class="flex flex-wrap gap-1 mb-4">
+                    ${product.tags.map(tag => `<span class="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded">#${tag}</span>`).join('')}
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="price-tag rounded-lg px-3 py-1.5">
+                        <span class="text-pink-400 font-mono font-bold text-lg">R$ ${product.price.toFixed(2)}</span>
+                    </div>
+                    <button onclick="event.stopPropagation(); addToCart(${product.id})" 
+                            class="w-10 h-10 bg-zinc-800 hover:bg-pink-500 hover:text-white rounded-xl flex items-center justify-center transition-all active:scale-90 shadow-lg">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        card.onclick = () => showProductModal(product);
+        grid.appendChild(card);
+    });
+}
+
+function getCategoryLabel(cat) {
+    const labels = {suco:'Suco',bolo:'Bolo',sorvete:'Sorvete',salgado:'Salgado',roupa:'Streetwear'};
+    return labels[cat] || cat;
+}
+
+function filterCategory(category) {
+    currentCategory = category;
+
+    document.querySelectorAll('.category-item').forEach(el => {
+        if (el.getAttribute('data-category') === category) {
+            el.classList.add('cat-active');
+            el.classList.remove('text-zinc-400','hover:bg-white/5');
+        } else {
+            el.classList.remove('cat-active');
+            el.classList.add('text-zinc-400','hover:bg-white/5');
+        }
+    });
+
+    if (category === 'all') {
+        renderProducts();
+        document.getElementById('section-title').textContent = "Todos os Produtos";
+    } else {
+        const filtered = products.filter(p => p.category === category);
+        renderProducts(filtered);
+        const catName = categories.find(c => c.id === category)?.name || category;
+        document.getElementById('section-title').textContent = catName;
+    }
+}
+
+function searchProducts() {
+    const term = sanitizeInput(document.getElementById('search-input').value).toLowerCase();
+    if (!term) {
+        filterCategory(currentCategory);
+        return;
+    }
+
+    const filtered = products.filter(p => 
+        p.name.toLowerCase().includes(term) ||
+        p.desc.toLowerCase().includes(term) ||
+        p.tags.some(tag => tag.toLowerCase().includes(term))
+    );
+
+    renderProducts(filtered);
+    document.getElementById('section-title').textContent = term ? `Resultados para "${escapeHtml(term)}"` : "Todos os Produtos";
+}
+
+// ==================== MODAL DE PRODUTO ====================
+function showProductModal(product) {
+    const modal = document.getElementById('product-modal');
+    const content = document.getElementById('modal-content');
+    const imgUrl = productImages[product.id] || `https://via.placeholder.com/400x300/1a1a1a/ec4899?text=${encodeURIComponent(product.name)}`;
+
+    content.innerHTML = `
+        <div class="h-56 relative overflow-hidden bg-zinc-800">
+            <img src="${imgUrl}" alt="${escapeHtml(product.name)}" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-transparent"></div>
+            <button onclick="closeProductModal()" class="absolute top-4 right-4 w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/70 transition-all">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="p-6">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-[10px] uppercase tracking-wider bg-pink-500/20 text-pink-400 px-2 py-1 rounded-lg border border-pink-500/20">
+                    ${getCategoryLabel(product.category)}
+                </span>
+                ${product.tags.map(tag => `<span class="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-1 rounded-lg">#${tag}</span>`).join('')}
+            </div>
+            <h3 class="font-display text-2xl font-bold mb-2 text-white">${escapeHtml(product.name)}</h3>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-6">${escapeHtml(product.desc)}</p>
+
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-zinc-500 text-xs mb-1">Preço unitário</p>
+                    <span class="text-pink-400 font-mono font-bold text-3xl">R$ ${product.price.toFixed(2)}</span>
+                </div>
+                <button onclick="addToCart(${product.id}); closeProductModal();" 
+                        class="bg-gradient-to-r from-pink-500 to-violet-600 hover:from-pink-600 hover:to-violet-700 px-8 py-4 rounded-2xl font-semibold text-white transition-all active:scale-95 shadow-lg flex items-center gap-2">
+                    <i class="fa-solid fa-cart-plus"></i>Adicionar
+                </button>
+            </div>
+        </div>
+    `;
+
+    modal.classList.remove('hidden');
+}
+
+function closeProductModal() {
+    document.getElementById('product-modal').classList.add('hidden');
+}
+
+// ==================== CARRINHO ====================
+function addToCart(id) {
+    const product = products.find(p => p.id === id);
+    if (!product) return;
+
+    const existing = cart.find(item => item.id === id);
+    if (existing) {
+        existing.quantity = (existing.quantity || 1) + 1;
+    } else {
+        cart.push({...product, quantity: 1});
+    }
+
+    updateCartCount();
+    showToast(`${escapeHtml(product.name)} adicionado! 🛒`);
+}
+
+function updateCartCount() {
+    let count = 0;
+    cart.forEach(item => count += item.quantity || 1);
+    const badge = document.getElementById('cart-count');
+    badge.textContent = count;
+
+    if (count > 0) {
+        badge.classList.remove('hidden');
+        badge.classList.add('animate-scale-in');
+    }
+}
+
+function renderCart() {
+    const container = document.getElementById('cart-items');
+    const summary = document.getElementById('cart-summary');
+
+    if (cart.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-20 glass rounded-3xl border border-white/5">
+                <div class="text-6xl mb-4 empty-cart">🛒</div>
+                <h3 class="text-xl font-semibold mb-2 text-white">Seu carrinho está vazio</h3>
+                <p class="text-zinc-500 mb-6">Adicione produtos deliciosos ao seu carrinho!</p>
+                <button onclick="showSection('catalog')" class="px-6 py-3 bg-pink-500/20 text-pink-400 rounded-xl font-medium hover:bg-pink-500/30 transition-all">
+                    Explorar Catálogo
+                </button>
+            </div>
+        `;
+        summary.classList.add('hidden');
+        return;
+    }
+
+    summary.classList.remove('hidden');
+    container.innerHTML = '';
+    let subtotal = 0;
+
+    cart.forEach((item, index) => {
+        const qty = item.quantity || 1;
+        const itemTotal = item.price * qty;
+        subtotal += itemTotal;
+        const imgUrl = productImages[item.id] || `https://via.placeholder.com/400x300/1a1a1a/ec4899?text=${encodeURIComponent(item.name)}`;
+
+        const div = document.createElement('div');
+        div.className = "cart-item glass rounded-2xl p-5 border border-white/5 flex gap-4";
+        div.style.animationDelay = `${index * 0.1}s`;
+
+        div.innerHTML = `
+            <div class="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-zinc-800">
+                <img src="${imgUrl}" alt="${escapeHtml(item.name)}" class="w-full h-full object-cover">
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-2 mb-1">
+                    <h4 class="font-semibold text-white truncate">${escapeHtml(item.name)}</h4>
+                    <span class="font-mono font-bold text-pink-400 whitespace-nowrap">R$ ${itemTotal.toFixed(2)}</span>
+                </div>
+                <p class="text-zinc-500 text-xs mb-3 line-clamp-1">${escapeHtml(item.desc)}</p>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-1 bg-zinc-800/50 rounded-xl p-1">
+                        <button onclick="changeQuantity(${index}, -1)" class="qty-btn w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400">
+                            <i class="fa-solid fa-minus text-xs"></i>
+                        </button>
+                        <span class="font-mono w-8 text-center text-sm font-bold text-white">${qty}</span>
+                        <button onclick="changeQuantity(${index}, 1)" class="qty-btn w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400">
+                            <i class="fa-solid fa-plus text-xs"></i>
+                        </button>
+                    </div>
+                    <span class="text-zinc-500 text-xs font-mono">R$ ${item.price.toFixed(2)} cada</span>
+                    <button onclick="removeFromCart(${index})" class="ml-auto text-zinc-500 hover:text-red-400 transition-colors p-2 hover:bg-red-500/10 rounded-xl">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+
+    document.getElementById('subtotal').textContent = `R$ ${subtotal.toFixed(2)}`;
+    document.getElementById('total').textContent = `R$ ${subtotal.toFixed(2)}`;
+}
+
+function changeQuantity(index, delta) {
+    cart[index].quantity = (cart[index].quantity || 1) + delta;
+    if (cart[index].quantity < 1) cart[index].quantity = 1;
+    renderCart();
+    updateCartCount();
+}
+
+function removeFromCart(index) {
+    const itemName = cart[index].name;
+    cart.splice(index, 1);
+    renderCart();
+    updateCartCount();
+    showToast(`${escapeHtml(itemName)} removido`, 'info');
+}
+
+// ==================== CHECKOUT ====================
+function checkout() {
+    if (cart.length === 0) return;
+
+    let total = 0;
+    cart.forEach(item => {
+        total += item.price * (item.quantity || 1);
+    });
+
+    if (total > credit) {
+        const needed = (total - credit).toFixed(2);
+        document.getElementById('error-message').innerHTML = 
+            `Transação Recusada: Saldo Insuficiente para concluir a operação no ambiente de testes.<br><br>` +
+            `<span class="text-zinc-500">Total da compra: <span class="text-red-400 font-mono">R$ ${total.toFixed(2)}</span></span><br>` +
+            `<span class="text-zinc-500">Saldo disponível: <span class="text-emerald-400 font-mono">R$ ${credit.toFixed(2)}</span></span><br>` +
+            `<span class="text-zinc-500">Faltam: <span class="text-amber-400 font-mono">R$ ${needed}</span></span>`;
+        document.getElementById('error-modal').classList.remove('hidden');
+        return;
+    }
+
+    credit -= total;
+    document.getElementById('credit-balance').textContent = credit.toFixed(2);
+
+    createConfetti();
+
+    const orderNum = Math.floor(Math.random() * 900000 + 100000);
+    document.getElementById('order-number').textContent = `#SB-${orderNum}`;
+    document.getElementById('success-credit').textContent = `R$ ${credit.toFixed(2)}`;
+
+    cart = [];
+    updateCartCount();
+    renderCart();
+
+    document.getElementById('success-modal').classList.remove('hidden');
+}
+
+function createConfetti() {
+    const colors = ['#ec4899', '#f59e0b', '#10b981', '#8b5cf6', '#f97316'];
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.top = '-10px';
+        confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+        confetti.style.width = Math.random() * 10 + 5 + 'px';
+        confetti.style.height = Math.random() * 10 + 5 + 'px';
+        confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 4000);
+    }
+}
+
+function closeSuccessModal() {
+    document.getElementById('success-modal').classList.add('hidden');
+    showSection('catalog');
+}
+
+function closeErrorModal() {
+    document.getElementById('error-modal').classList.add('hidden');
+}
+
+// ==================== TOAST ====================
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+
+    const icons = {
+        success: '<i class="fa-solid fa-check-circle text-emerald-400"></i>',
+        info: '<i class="fa-solid fa-info-circle text-blue-400"></i>',
+        error: '<i class="fa-solid fa-circle-xmark text-red-400"></i>'
+    };
+
+    const borders = {
+        success: 'border-emerald-500/20',
+        info: 'border-blue-500/20',
+        error: 'border-red-500/20'
+    };
+
+    toast.className = `toast glass border ${borders[type]} rounded-2xl px-6 py-4 flex items-center gap-3 shadow-2xl pointer-events-auto min-w-[300px]`;
+    toast.innerHTML = `${icons[type]}<span class="text-sm font-medium text-white">${message}</span>`;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.transition = 'all 0.4s ease';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(20px)';
+        setTimeout(() => toast.remove(), 400);
+    }, 3000);
+}
+
+// ==================== TECLA ESC ====================
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeProductModal();
+        closeSuccessModal();
+        closeErrorModal();
+    }
+});
+
+// ==================== INICIALIZAÇÃO ====================
+window.onload = () => {
+    console.log('Sweet Blend Shop v3.0 carregado. Aguardando login...');
+};
+</script>
+</body>
+</html>
